@@ -28,7 +28,7 @@ QueryData genLastAccess(QueryContext& context) {
 #else
 
 #ifndef __FreeBSD__
-  utmpxname("/var/log/wtmpx");
+  utmpxname(_PATH_WTMP);
 #endif
   setutxent();
 
