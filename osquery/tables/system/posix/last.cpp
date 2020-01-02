@@ -20,7 +20,7 @@ namespace tables {
 
 namespace impl {
 
-Row genLastAccessForRow(utmpx* ut) {
+void genLastAccessForRow(utmpx* ut, QueryData& results) {
   if (ut->ut_type == USER_PROCESS || ut->ut_type == DEAD_PROCESS) {
     Row r;
     r["username"] = TEXT(ut->ut_user);
@@ -29,7 +29,7 @@ Row genLastAccessForRow(utmpx* ut) {
     r["type"] = INTEGER(ut->ut_type);
     r["time"] = INTEGER(ut->ut_tv.tv_sec);
     r["host"] = TEXT(ut->ut_host);
-    return r;
+    results.push_back(r);
   }
 }
 
@@ -43,11 +43,15 @@ QueryData genLastAccess(QueryContext& context) {
 
   while ((ut = getutxent_wtmp()) != nullptr) {
 #else
+
+#ifndef __FreeBSD__
+  utmpxname(_PATH_WTMP);
+#endif
   setutxent();
 
   while ((ut = getutxent()) != nullptr) {
 #endif
-    results.push_back(impl::genLastAccessForRow(ut));
+    impl::genLastAccessForRow(ut, results);
   }
 
 #ifdef __APPLE__
