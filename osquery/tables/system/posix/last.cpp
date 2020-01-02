@@ -18,6 +18,17 @@
 namespace osquery {
 namespace tables {
 
+Row genLastAccessForRow(utmpx* ut) {
+  Row r;
+  r["username"] = TEXT(ut->ut_user);
+  r["tty"] = TEXT(ut->ut_line);
+  r["pid"] = INTEGER(ut->ut_pid);
+  r["type"] = INTEGER(ut->ut_type);
+  r["time"] = INTEGER(ut->ut_tv.tv_sec);
+  r["host"] = TEXT(ut->ut_host);
+  return r;
+}
+
 void genLastAccessForFile(QueryData& results) {
   struct utmpx* ut;
 #ifdef __APPLE__
@@ -35,15 +46,7 @@ void genLastAccessForFile(QueryData& results) {
 #endif
 
     if (ut->ut_type == USER_PROCESS || ut->ut_type == DEAD_PROCESS) {
-      Row r;
-      r["username"] = TEXT(ut->ut_user);
-      r["tty"] = TEXT(ut->ut_line);
-      r["pid"] = INTEGER(ut->ut_pid);
-      r["type"] = INTEGER(ut->ut_type);
-      r["time"] = INTEGER(ut->ut_tv.tv_sec);
-      r["host"] = TEXT(ut->ut_host);
-
-      results.push_back(r);
+      results.push_back(genLastAccessForRow(ut));
     }
   }
 
