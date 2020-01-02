@@ -18,36 +18,36 @@
 namespace osquery {
 namespace tables {
 
+namespace impl {
+
 Row genLastAccessForRow(utmpx* ut) {
-  Row r;
-  r["username"] = TEXT(ut->ut_user);
-  r["tty"] = TEXT(ut->ut_line);
-  r["pid"] = INTEGER(ut->ut_pid);
-  r["type"] = INTEGER(ut->ut_type);
-  r["time"] = INTEGER(ut->ut_tv.tv_sec);
-  r["host"] = TEXT(ut->ut_host);
-  return r;
+  if (ut->ut_type == USER_PROCESS || ut->ut_type == DEAD_PROCESS) {
+    Row r;
+    r["username"] = TEXT(ut->ut_user);
+    r["tty"] = TEXT(ut->ut_line);
+    r["pid"] = INTEGER(ut->ut_pid);
+    r["type"] = INTEGER(ut->ut_type);
+    r["time"] = INTEGER(ut->ut_tv.tv_sec);
+    r["host"] = TEXT(ut->ut_host);
+    return r;
+  }
 }
 
-void genLastAccessForFile(QueryData& results) {
+} // namespace impl
+
+QueryData genLastAccess(QueryContext& context) {
+  QueryData results;
   struct utmpx* ut;
 #ifdef __APPLE__
   setutxent_wtmp(0); // 0 = reverse chronological order
 
   while ((ut = getutxent_wtmp()) != nullptr) {
 #else
-
-#ifndef __FreeBSD__
-  utmpxname(_PATH_WTMP);
-#endif
   setutxent();
 
   while ((ut = getutxent()) != nullptr) {
 #endif
-
-    if (ut->ut_type == USER_PROCESS || ut->ut_type == DEAD_PROCESS) {
-      results.push_back(genLastAccessForRow(ut));
-    }
+    results.push_back(genLastAccessForRow(ut));
   }
 
 #ifdef __APPLE__
@@ -55,11 +55,6 @@ void genLastAccessForFile(QueryData& results) {
 #else
   endutxent();
 #endif
-}
-
-QueryData genLastAccess(QueryContext& context) {
-  QueryData results;
-  genLastAccessForFile(results);
   return results;
 }
 }
