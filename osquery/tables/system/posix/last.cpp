@@ -6,14 +6,10 @@
  *  the LICENSE file found in the root directory of this source tree.
  */
 
-#include <vector>
-#include <string>
-
 #include <utmpx.h>
 
 #include <osquery/core.h>
 #include <osquery/tables.h>
-#include <osquery/utils/system/time.h>
 
 namespace osquery {
 namespace tables {
