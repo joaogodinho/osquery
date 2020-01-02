@@ -52,8 +52,6 @@ void genLastAccessForFile(QueryData& results) {
 #else
   endutxent();
 #endif
-
-  return results;
 }
 
 QueryData genLastAccess(QueryContext& context) {
