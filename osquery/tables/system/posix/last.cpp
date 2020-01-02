@@ -18,8 +18,7 @@
 namespace osquery {
 namespace tables {
 
-QueryData genLastAccess(QueryContext& context) {
-  QueryData results;
+void genLastAccessForFile(QueryData& results) {
   struct utmpx* ut;
 #ifdef __APPLE__
   setutxent_wtmp(0); // 0 = reverse chronological order
@@ -54,6 +53,12 @@ QueryData genLastAccess(QueryContext& context) {
   endutxent();
 #endif
 
+  return results;
+}
+
+QueryData genLastAccess(QueryContext& context) {
+  QueryData results;
+  genLastAccessForFile(results);
   return results;
 }
 }
